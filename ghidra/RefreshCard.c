@@ -425,7 +425,7 @@ void FUN_800471ac(void)
 }
 
 
-
+// sets on-screen message (save/load/error)
 void FUN_800471c4(undefined2 param_1)
 
 {
@@ -588,6 +588,7 @@ LAB_80047544:
 	// if loading ghost profile
 	if (DAT_8008d478 == 5)
 	{
+	  // Loading
       FUN_800471c4(4);
 
 	  // ghost profile (save or load?)
@@ -602,12 +603,14 @@ LAB_80047544:
 		  // memcard action = null
           DAT_8008d478 = 2;
           
+		  // Saving
 		  FUN_800471c4(3);
 
 		  // 800859e4
 		  // BASCUS-94426-SLOTS
           pcVar6 = s_BASCUS_94426_SLOTS_800859e4;
 
+		  // memcardIcon_HeaderSLOTS
 		  puVar7 = (undefined4 *)&DAT_800859f8;
 
 		  // size of memory card buffer
@@ -643,6 +646,7 @@ LAB_8004753c:
             DAT_80099294 = *(undefined4 *)(&DAT_8009aa70 + iVar2);
             DAT_80099298 = (&DAT_8009aa74)[iVar2];
 
+			// Saving
 			FUN_800471c4(3);
 
 			// Name of Ghost profile to save to
@@ -663,8 +667,14 @@ LAB_8004753c:
             DAT_8009aa5c = DAT_8009aa5c + -1;
             break;
           }
+		  
+		  // Saving
           FUN_800471c4(3);
+		  
+		  // BASCUS-94426G name
           pcVar6 = (char *)&DAT_80085a30;
+		  
+		  // memcardIcon_HeaderGHOST
           puVar7 = &DAT_800992a4;
 
 		  // size of two memcard slots

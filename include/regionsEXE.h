@@ -4714,8 +4714,7 @@ struct sData
 	char s_bu00_BASCUS_94426_slots[0x20];
 
 	// 800990c4
-	// ghost profile: file name?
-	char s_unk_someOtherMemcardString[0x20];
+	char s_memcardFindGhostFile[0x20];
 
 	// 80094d68 -- Aug14
 	// 80097C78 -- SepReview
@@ -4726,9 +4725,13 @@ struct sData
 	struct Mempack mempack[3]; // each is 0x60 bytes
 
 	// 80099204
-	char fillerAfterMempack[0xA0];
+	char fillerAfterMempack[0x60];
 
 	// 80099264 (time string at end of time trial race)
+	char ghostStrTrackTime[0x20];
+	
+	// 80099284
+	char ghostFileNameFinal[0x20];
 	
 	// 800992a4
 	char memcardIcon_HeaderGHOST[0x40];
