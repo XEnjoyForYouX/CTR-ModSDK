@@ -1561,9 +1561,10 @@ struct Driver
 	char meterGrade[2]; // 0x644
 	short meterGradeTimer; // 0x646
 	int gradeColor; // 0x648
+	
+	struct JitPoolHeader jitPoolHeader;
 	#endif
 
-	struct JitPoolHeader jitPoolHeader;
 	// 0x638
 	// end of ghost struct (as determined by memset)
 
@@ -1582,5 +1583,5 @@ _Static_assert(sizeof(struct MetaPhys) == 0x1C);
 #endif
 
 #if BUILD == UsaRetail && !defined(USE_ONLINE)
-_Static_assert(sizeof(struct Driver) == 0x638);
+_Static_assert(sizeof(struct Driver) == 0x638 + 0x8);
 #endif
