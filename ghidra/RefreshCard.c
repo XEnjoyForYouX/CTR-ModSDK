@@ -39,7 +39,7 @@ void FUN_80046a74(void)
 }
 
 
-
+// RefreshCard_GetResult
 uint FUN_80046a90(short param_1)
 
 {
@@ -53,10 +53,13 @@ uint FUN_80046a90(short param_1)
   
   if (
 		((DAT_8009aa30 & 6) == 0) && 
+		
+		// if frame3 == frame4
 		(DAT_8009aa3e == DAT_8009aa42) &&
 		(DAT_8009aa40 == DAT_8009aa44)
 	) 
   {
+	// is desired_memcardResult == WhatYouLookFor?
     uVar1 = (uint)(DAT_8009aa34 == param_1);
   }
   return uVar1;
@@ -73,25 +76,16 @@ void FUN_80046b1c(undefined2 param_1,undefined2 param_2,undefined4 param_3,undef
                  undefined4 param_5,undefined2 param_6)
 
 {
-  // param2 is 1 for SLOTS
-  // param2 is 3 for ghost data
-
   DAT_8009aa30 = DAT_8009aa30 & 0xfffffff7;
 
-  // 1 - GetInfo
-  // 2 - Save
-  // 3 - Load
-  // 4 - Format
-  // 5 - Erase
-  // see similar variable "switch(DAT_8009aa36)"
+  // frame2_memcardAction
+  // frame2_memcardSlot
   DAT_8009aa3a = param_2;
-
-  // slotIndex
   DAT_8009aa3c = param_1;
 
+  // frame4_memcardAction
+  // frame4_memcardSlot
   DAT_8009aa42 = param_2;
-
-  // param1 always zero?
   DAT_8009aa44 = param_1;
 
   // Save filename (BASCUS...)
@@ -581,6 +575,8 @@ void FUN_800472d0(void)
     DAT_8008d478 = 2;
 	
     FUN_800471c4();
+	
+	// MC_ACTION_Format
     uVar5 = 4;
 
 	// 800859e4
@@ -636,7 +632,10 @@ LAB_80047544:
 		  // 8008d470 -> 800992E4, holds all memory card bytes
           local_20 = PTR_DAT_8008d470;
 LAB_8004753c:
+
+		  // MC_ACTION_Save
           uVar5 = 2;
+		  
           goto LAB_80047544;
         }
       }
@@ -709,7 +708,7 @@ LAB_800475b4:
     DAT_8008d984 = 1;
   }
   
-  // if NEWCARD detected
+  // RefreshCard_GetResult(MC_RESULT_NEWCARD)
   iVar2 = FUN_80046a90(3);
   if (iVar2 != 0) {
     FUN_800471e8();
@@ -720,26 +719,30 @@ LAB_800475b4:
     goto LAB_80047a08;
   }
   
+  // RefreshCard_GetResult(MC_RESULT_ERROR_NOCARD)
   iVar2 = FUN_80046a90(0);
   
   // if memory card is present
   if (iVar2 == 0) 
   {
+	// RefreshCard_GetResult(MC_RESULT_FULL)
     iVar2 = FUN_80046a90(1);
     local_1c = 6;
     if (iVar2 == 0) {
       
-	  // if TIMEOUT (no card) detected
+	  // RefreshCard_GetResult(MC_RESULT_ERROR_TIMEOUT)
 	  iVar2 = FUN_80046a90(2);
       
 	  // no TIMEOUT
 	  if (iVar2 == 0) 
 	  {
+		// RefreshCard_GetResult(MC_RESULT_ERROR_NODATA)
         iVar2 = FUN_80046a90(5);
         
 		// if data found on memcard
 		if (iVar2 == 0) 
 		{
+		  // RefreshCard_GetResult(READY_LOAD)
           iVar2 = FUN_80046a90(4);
           if (iVar2 != 0) 
 		  {
@@ -756,6 +759,7 @@ LAB_800479bc:
 			// "Loading..."
             FUN_800471c4(4);
 			
+			// MC_ACTION_Load
             uVar5 = 3;
 
 			// 800859e4
@@ -770,14 +774,20 @@ LAB_800479bc:
 			// 8008d470 -> 800992E4, holds all memory card bytes
             local_20 = PTR_DAT_8008d470;
 LAB_800479f4:
-            bVar1 = false;
-            FUN_80046b1c(0,uVar5,pcVar6,puVar7,local_20,local_1c);
+            
+			bVar1 = false;
+            
+			// action is save/load/format/erase
+			FUN_80046b1c(0,uVar5,pcVar6,puVar7,local_20,local_1c);
+			
             DAT_8008d984 = 0;
             goto LAB_80047a08;
           }
 		  
-		  // check if memcard is unformatted
+		  // RefreshCard_GetResult(ERROR_UNFORMATTED)
           iVar2 = FUN_80046a90(6);
+		  
+		  // if unformatted
           if (iVar2 != 0)
 		  {
 			// RefreshCard_GetNumGhostsTotal
@@ -791,6 +801,7 @@ LAB_800479f4:
 			goto LAB_800476b4;
           }
           
+		  // RefreshCard_GetResult(READY_SAVE)
 		  iVar2 = FUN_80046a90(7);
           if (iVar2 == 0) goto LAB_80047a08;
           
@@ -877,8 +888,7 @@ LAB_800479f4:
 				  // NULL
                   FUN_800471c4(8);
 
-				  // 800859e4
-				  // BASCUS-94426-SLOTS
+				  // 1 = MC_ACTION_GetInfo
                   FUN_80046b1c(0,1,s_BASCUS_94426_SLOTS_800859e4,0,0,0);
 
 				  bVar1 = false;
@@ -941,7 +951,9 @@ LAB_800479f4:
 		  // memcard action = null
           DAT_8008d478 = 2;
         }
-        else
+        
+		// if no data is found
+		else
 		{
 		  // the save is not outdated
           DAT_8008d944 = 0;
@@ -958,8 +970,7 @@ LAB_80047984:
           FUN_800471c4(local_1c);
         }
 
-		// 800859e4
-		// BASCUS-94426-SLOTS
+		// 1 = MC_ACTION_GetInfo
         FUN_80046b1c(0,1,s_BASCUS_94426_SLOTS_800859e4,0,0,0);
 
 		bVar1 = false;
@@ -987,8 +998,7 @@ LAB_80047984:
 LAB_800476b4:
   FUN_800471c4(local_1c);
 
-  // 800859e4
-  // BASCUS-94426-SLOTS
+  // 1 = MC_ACTION_GetInfo
   FUN_80046b1c(0,1,s_BASCUS_94426_SLOTS_800859e4,0,0,0);
 
   DAT_8008d984 = 1;
@@ -996,8 +1006,7 @@ LAB_800476b4:
 LAB_80047a08:
   if ((bVar1) && (iVar2 = FUN_80046a90(8), iVar2 == 0))
   {
-	// 800859e4
-	// BASCUS-94426-SLOTS
+	// 1 = MC_ACTION_GetInfo
     FUN_80046b1c(0,1,s_BASCUS_94426_SLOTS_800859e4,0,0,0);
   }
   return;
@@ -1014,22 +1023,31 @@ void FUN_80047a58(void)
   int iVar4;
 
   iVar4 = -1;
-  if ((DAT_8009aa30 & 1) == 0) {
-    if (DAT_8009aa36 != 0) {
+  if ((DAT_8009aa30 & 1) == 0) 
+  {
+	// frame1_memcardAction
+    if (DAT_8009aa36 != 0) 
+	{
       iVar4 = FUN_8003ddac();
-      DAT_8009aa3e = DAT_8009aa36;
+      
+	  // frame3 = frame1
+	  DAT_8009aa3e = DAT_8009aa36;
       DAT_8009aa40 = DAT_8009aa38;
     }
   }
-  else {
+  else 
+  {
+	// frame3 = frame1
     DAT_8009aa3e = DAT_8009aa36;
     DAT_8009aa40 = DAT_8009aa38;
+	
     uVar1 = DAT_8009aa30 & 0xfffffffe;
     if ((DAT_8009aa30 & 2) == 0) {
       uVar1 = DAT_8009aa30 & 0xfffffffa;
     }
     DAT_8009aa30 = uVar1;
 
+	// frame1_memcardAction
     switch(DAT_8009aa36)
 	{
     case 1:
@@ -1114,70 +1132,100 @@ void FUN_80047a58(void)
   }
   switch(iVar2 >> 0x10) {
   
-  // from MEMCARD_GetNextSwEvent == IOE (processing done)
+  // MC_RETURN_IOE (processing done)
   case 0:
+  
+	// MC_RESULT_READY_SAVE
     DAT_8009aa34 = 7;
-    if ((DAT_8009aa36 == 1) && (DAT_8009aa34 = 4, (DAT_8009aa30 & 8) == 0)) {
+	
+    if (
+			(DAT_8009aa36 == 1) && 
+			(
+				// MC_RESULT_READY_LOAD
+				DAT_8009aa34 = 4, 
+				
+				(DAT_8009aa30 & 8) == 0
+			)
+		)
+	{
+		// MC_RESULT_READY_SAVE
       DAT_8009aa34 = 7;
     }
     break;
   
-  // from MEMCARD_GetInfo, 
-  // from MEMCARD_Save if seek() fails or write() fails
-  // from MEMCARD_Load if seek() fails or read() fails
-  // from MEMCARD_GetNextSwEvent fail (ERROR, bad card)
+  // MC_RETURN TIMEOUT
   case 1:
+	// MC_RESULT_ERROR_TIMEOUT
     DAT_8009aa34 = 2;
     break;
 	
-  // from MEMCARD_GetNextSwEvent fail (TIMEOUT, no card)
+  // MC_RETURN_NOCARD
   case 2:
+	// MC_RESULT_ERROR_NOCARD
     DAT_8009aa34 = 0;
+	
     DAT_8009aa36 = 0;
-    goto switchD_80047c84_caseD_8;
+    
+	goto switchD_80047c84_caseD_8;
   
-  // from MEMCARD_GetNextSwEvent fail (NEWCARD)
+  // MC_RETURN_NEWCARD
   case 3:
+	// MC_RESULT_NEWCARD
     DAT_8009aa34 = 3;
-    if (DAT_8009aa36 == 4) {
+	
+    if (DAT_8009aa36 == 4) 
+	{
+	  // MC_RESULT_READY_SAVE
       DAT_8009aa34 = 7;
     }
     break;
   
-  // from MEMCARD_Save if open() fails
+  // MC_RETURN_FULL
   case 4:
+	// MC_RESULT_FULL
     DAT_8009aa34 = 1;
     break;
   
   // from FUN_8003ddac
+  // MC_RETURN_UNFORMATTED
   case 5:
+	// MC_RESULT_ERROR_UNFORMATTED
     DAT_8009aa34 = 6;
     break;
   
-  // from MEMCARD_Load if open() fails
+  // MC_RETURN_NODATA
   case 6:
+	// MC_RESULT_ERROR_NODATA
     DAT_8009aa34 = 5;
     break;
   
-  // from MEMCARD_GetInfo, 
-  // from MEMCARD_Save if write() works
-  // from MEMCARD_Load if read() works
+  // MC_RETURN_SUCCESS
   case 7:
+	// MC_RESULT_FINISHED
     DAT_8009aa34 = 8;
 	
   default:
     goto switchD_80047c84_caseD_8;
   }
   
+  // frame1_memcardAction NULL
   DAT_8009aa36 = 0;
   
 switchD_80047c84_caseD_8:
   
-  if ((DAT_8009aa36 == 0) && (DAT_8009aa3a != 0)) {
+  if (
+		// frame1_memcardAction == NULL
+		(DAT_8009aa36 == 0) && 
+		
+		// frame2_memcardAction != NULL
+		(DAT_8009aa3a != 0)
+	) 
+  {
+	// set frame1, erase frame2
     DAT_8009aa36 = DAT_8009aa3a;
     DAT_8009aa3a = 0;
 
-	// slotIndex
+	// set frame1, leave frame2
 	DAT_8009aa38 = DAT_8009aa3c;
 
     DAT_8009aa30 = DAT_8009aa30 & 0xfffffffd | 1;
