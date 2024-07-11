@@ -336,12 +336,14 @@ void DECOMP_MainFrame_RenderFrame(struct GameTracker* gGT, struct GamepadSystem*
 		{
 			DECOMP_DotLights(gGT);
 
+			#ifndef USE_ONLINE
 			if((gGT->renderFlags & 0x8000) != 0)
 			{
 				WindowBoxLines(gGT);
+				
 				WindowDivsionLines(gGT);
 			}
-
+			#endif
 		}
 
 #ifndef REBUILD_PS1
@@ -1504,6 +1506,7 @@ void MultiplayerWumpaHUD(struct GameTracker* gGT)
 	#endif
 }
 
+#ifndef USE_ONLINE
 void WindowBoxLines(struct GameTracker* gGT)
 {
 	int i;
@@ -1649,6 +1652,7 @@ void WindowDivsionLines(struct GameTracker* gGT)
 		gGT->backBuffer->primMem.curr = (void*)(p + 1);
     }
 }
+#endif
 
 void RenderDispEnv_UI(struct GameTracker* gGT)
 {
