@@ -48,6 +48,12 @@
     <ClCompile Include="..\..\..\..\..\externals\enet\win32.c">
       <Filter>Source Files\enet</Filter>
     </ClCompile>
+    <ClCompile Include="win_d3d11.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="win_entry.c">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\..\..\..\decompile\General\AltMods\OnlineCTR\global.h">

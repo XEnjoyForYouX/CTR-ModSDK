@@ -1,3 +1,5 @@
+#define _CRT_SECURE_NO_WARNINGS
+
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
@@ -15,6 +17,7 @@
 #pragma comment (lib, "Ws2_32.lib")
 #pragma comment (lib, "Mswsock.lib")
 #pragma comment (lib, "AdvApi32.lib")
+#pragma comment (lib, "User32.lib")
 
 #define WINDOWS_INCLUDE
 #include "../../../../../decompile/General/AltMods/OnlineCTR/global.h"
@@ -1049,11 +1052,13 @@ void (*ClientState[]) () = {
 	StatePC_Game_EndRace			// 12
 };
 
-// for EnumProcessModules
-#pragma comment(lib, "psapi.lib")
-
-int main()
+int normalMain()
 {
+	AllocConsole();
+	freopen("CONIN$", "r", stdin);
+	freopen("CONOUT$", "w", stdout);
+	freopen("CONOUT$", "w", stderr);
+
 	HWND console = GetConsoleWindow();
 	RECT r;
 	GetWindowRect(console, &r); // stores the console's current dimensions
@@ -1072,103 +1077,14 @@ int main()
 	PrintBanner(SHOW_NAME);
 	printf("\n");
 
-	int numDuckInstances = 0;
-	char* duckTemplate = "duckstation";
-	int duckPID = -1;
-
-	// copy from
-	// https://learn.microsoft.com/en-us/windows/win32/psapi/enumerating-all-processes
-	DWORD aProcesses[1024], cbNeeded, cProcesses;
-	EnumProcesses(aProcesses, sizeof(aProcesses), &cbNeeded);
-	cProcesses = cbNeeded / sizeof(DWORD);
-
-	for (int i = 0; i < cProcesses; i++)
-	{
-		DWORD processID = aProcesses[i];
-
-		if (processID != 0)
-		{
-			HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, processID);
-
-			if (NULL != hProcess)
-			{
-				HMODULE hMod;
-				DWORD cbNeeded;
-
-				if (EnumProcessModules(hProcess, &hMod, sizeof(hMod), &cbNeeded))
-				{
-					TCHAR szProcessName[MAX_PATH];
-					GetModuleBaseNameA(hProcess, hMod, szProcessName, sizeof(szProcessName) / sizeof(TCHAR));
-
-					char* procName = (char*)&szProcessName[0];
-
-					if (
-						(*(int*)&procName[0] == *(int*)&duckTemplate[0]) &&
-						(*(int*)&procName[4] == *(int*)&duckTemplate[4])
-						)
-					{
-						numDuckInstances++;
-						duckPID = processID;
-					}
-				}
-			}
-		}
-	}
-
-	if (numDuckInstances == 0)
-	{
-		printf("Error: DuckStation is not running!\n\n");
-		system("pause");
-		exit(0);
-	}
-	else printf("Client: DuckStation detected\n");
-
-	char pidStr[16];
-
-	if (numDuckInstances > 1)
-	{
-		printf("Warning: Multiple DuckStations detected\n");
-		printf("Please enter the PID manually\n\n");
-
-		printf("Input.: DuckStation PID: ");
-		scanf_s("%s", pidStr, (int)sizeof(pidStr));
-	}
-	else
-	{
-		sprintf_s(pidStr, 100, "%d", duckPID);
-	}
-
-	char duckName[100];
-	sprintf_s(duckName, 100, "duckstation_%s", pidStr);
-
-	TCHAR duckNameT[100];
-	swprintf(duckNameT, 100, L"%hs", duckName);
-
-	// 8 MB RAM
-	const unsigned int size = 0x800000;
-	HANDLE hFile = OpenFileMapping(FILE_MAP_READ | FILE_MAP_WRITE, FALSE, duckNameT);
-	pBuf = (char*)MapViewOfFile(hFile, FILE_MAP_READ | FILE_MAP_WRITE, 0, 0, size);
-
-	if (pBuf == 0)
-	{
-		printf("Error: Failed to open DuckStation!\n\n");
-		system("pause");
-		system("cls");
-		main();
-	}
-
-	octr = (struct OnlineCTR*)&pBuf[0x8000C000 & 0xffffff];
-
 	// initialize enet
 	if (enet_initialize() != 0)
 	{
 		printf(stderr, "Error: Failed to initialize ENet!\n");
-
+		system("pause");
+		exit(0);
 		return 1;
 	}
-
-	atexit(enet_deinitialize);
-	printf("Client: Waiting for the OnlineCTR binary to load...  ");
 
 	// 5ms sleep by default
 	int sleepCount = 5000;
