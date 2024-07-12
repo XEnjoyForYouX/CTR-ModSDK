@@ -1101,7 +1101,7 @@ int normalMain()
 			// 30fps 1x resolution = 4500
 			// 30fps 9x resolution = 2500
 			// 60fps = 0
-			printf("Debug: SleepCount=%d\n", sleepCount);
+			//printf("Debug: SleepCount=%d\n", sleepCount);
 		}
 
 		// should rename to room selection
